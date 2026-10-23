@@ -5,7 +5,7 @@
 int get_smallest_diff(std::vector<int> v)
 {
     int min = v[1] - v[0]; //اول فرق
-    int corr = min<0? -1 : 1; //لو ساب هات سالب هنستعمله
+    int corr = min<0? -1 : 1; //لو سالب هات سالب هنستعمله
     min *= corr; //اضرب ف التعديل
     for (int i=2;i<(int)v.size();i++) //لف
     {
