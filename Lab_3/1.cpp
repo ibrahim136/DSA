@@ -10,6 +10,7 @@ std::vector <std::pair<int,int>> pairs_to_get_sum(std::vector <int> v,int k)
         {
             if (v[i] + v[j] == k){
                 ret.push_back(std::make_pair(v[i],v[j]));
+                break;
             }
         }
     }
