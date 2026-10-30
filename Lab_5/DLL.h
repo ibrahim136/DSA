@@ -15,6 +15,7 @@ public:
     DLL();
     DLL(int num);
     DLL(std::vector<int> v);
+    ~DLL();
     void Display();
     int count();
     int sum();

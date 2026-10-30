@@ -37,6 +37,18 @@ DLL::DLL(std::vector<int> v)
     }
 }
 
+DLL::~DLL()
+{
+    Node *temp;
+    while (head)
+    {
+        temp = head;
+        head = head->GetNext();
+        delete temp;
+        temp = nullptr;
+    }
+}
+
 void DLL::Display()
 {
     Node *temp = head;
