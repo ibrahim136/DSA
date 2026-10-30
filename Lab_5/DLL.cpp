@@ -1,6 +1,6 @@
 #include "DLL.h"
 
-void DLL::CheckAllocation(Node *Node)
+void DLL::CheckAllocation(Node * Node)
 {
     if (!Node)
     {
@@ -40,11 +40,13 @@ DLL::DLL(std::vector<int> v)
 void DLL::Display()
 {
     Node *temp = head;
+    std::cout << "Null  <->  ";
     while (temp)
     {
-        std::cout << temp->GetData() << " <---> ";
+        std::cout << temp->GetData() << "  <->  ";
+        temp = temp->GetNext();
     }
-    std::cout << "Null Pointer\n";
+    std::cout << "Null\n";
 }
 
 int DLL::count()
@@ -66,6 +68,7 @@ int DLL::sum()
     while (temp)
     {
         sum += temp->GetData();
+        temp = temp->GetNext();
     }
     return sum;
 }
@@ -81,6 +84,7 @@ int DLL::max()
     while (temp)
     {
         max = max < temp->GetData() ? temp->GetData() : max;
+        temp = temp->GetNext();
     }
     return max;
 }
@@ -96,6 +100,7 @@ int DLL::min()
     while (temp)
     {
         min = min > temp->GetData() ? temp->GetData() : min;
+        temp = temp->GetNext();
     }
     return min;
 }
@@ -120,8 +125,35 @@ void DLL::InsertAtTail(int data)
 
 void DLL::InsertAtPos(int data, int pos)
 {
+    if (pos < 1)
+    {
+        pos = 1;
+    }
+    if (pos == 1)
+    {
+        InsertAtHead(data);
+        return;
+    }
+    Node *temp = head;
+    for (int i = 1; i < pos - 1 && temp->GetNext(); i++)
+    {
+        temp = temp->GetNext();
+    }
+    if (temp == tail)
+    {
+        InsertAtTail(data);
+        return;
+    }
+    Node *NewNode = new Node(data);
+    CheckAllocation(NewNode);
+    NewNode->SetNext(temp->GetNext());
+    NewNode->SetPrev(temp);
+    temp->SetNext(NewNode);
+    NewNode->GetNext()->SetPrev(NewNode);
+    return;
 }
-void DLL::DeleteAtHead(int data)
+
+void DLL::DeleteAtHead()
 {
     Node *temp = head;
     head = head->GetNext();
@@ -130,7 +162,7 @@ void DLL::DeleteAtHead(int data)
     temp = nullptr;
 }
 
-void DLL::DeleteAtTail(int data)
+void DLL::DeleteAtTail()
 {
     Node *temp = tail;
     tail = tail->GetPrev();
@@ -139,7 +171,29 @@ void DLL::DeleteAtTail(int data)
     temp = nullptr;
 }
 
-void DeleteAtPos(int data, int pos)
+void DLL::DeleteAtPos(int pos)
 {
-    
+    if (pos < 1)
+    {
+        pos = 1;
+    }
+    if (pos == 1)
+    {
+        DeleteAtHead();
+        return;
+    }
+    Node *temp = head;
+    for (int i = 1; i < pos - 1 && temp->GetNext(); i++)
+    {
+        temp = temp->GetNext();
+    }
+    if (temp == tail)
+    {
+        DeleteAtTail();
+        return;
+    }
+    Node *ToBeDeletedNode = temp->GetNext();
+    temp->SetNext(temp->GetNext()->GetNext());
+    temp->GetNext()->SetPrev(temp);
+    return;
 }

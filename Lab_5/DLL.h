@@ -9,6 +9,7 @@ class DLL
 private:
     Node *head;
     Node *tail;
+    void CheckAllocation(Node * Node);
 public:
     DLL();
     DLL(int num);
@@ -21,9 +22,9 @@ public:
     void InsertAtHead(int data);
     void InsertAtTail(int data);
     void InsertAtPos(int data,int pos);
-    void DeleteAtHead(int data);
-    void DeleteAtTail(int data);
-    void DeleteAtPos(int data,int pos);
+    void DeleteAtHead();
+    void DeleteAtTail();
+    void DeleteAtPos(int pos);
 
 };
 
