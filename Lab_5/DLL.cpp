@@ -1,6 +1,6 @@
 #include "DLL.h"
 
-void DLL::CheckAllocation(Node * Node)
+void DLL::CheckAllocation(Node *Node)
 {
     if (!Node)
     {
