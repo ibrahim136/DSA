@@ -207,5 +207,6 @@ void DLL::DeleteAtPos(int pos)
     Node *ToBeDeletedNode = temp->GetNext();
     temp->SetNext(temp->GetNext()->GetNext());
     temp->GetNext()->SetPrev(temp);
+    delete (ToBeDeletedNode);
     return;
 }
