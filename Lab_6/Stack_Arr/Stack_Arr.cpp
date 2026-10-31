@@ -2,7 +2,7 @@
 
 Stack_Arr::Stack_Arr() : arr{new int[5]}, capacity(5), sp(-1) {}
 
-Stack_Arr::Stack_Arr(int capacity) : arr{new int[capacity]}, capacity(capacity), sp(-1) {}
+Stack_Arr::Stack_Arr(int capacity) : arr{capacity >0 ? new int[capacity] : new int[5]}, capacity(capacity> 0 ? capacity : 5), sp(-1) {}
 
 Stack_Arr::~Stack_Arr() { delete [] arr ; }
 
