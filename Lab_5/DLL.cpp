@@ -12,14 +12,16 @@ DLL::DLL() : head{nullptr}, tail{nullptr} {}
 
 DLL::DLL(int num) : tail{nullptr}
 {
-    head->SetData(num);
+    head = tail = new Node(num);
+    CheckAllocation(head);
+    return;
 }
 
 DLL::DLL(std::vector<int> v)
 {
     if (!(int)v.size())
     {
-        DLL();
+        head = tail = nullptr;
         return;
     }
     head = new Node(v[0]);
@@ -45,8 +47,8 @@ DLL::~DLL()
         temp = head;
         head = head->GetNext();
         delete temp;
-        temp = nullptr;
     }
+    tail = nullptr;
 }
 
 void DLL::Display()
@@ -119,6 +121,12 @@ int DLL::min()
 
 void DLL::InsertAtHead(int data)
 {
+    if (!head)
+    {
+        head = tail = new Node(data);
+        CheckAllocation(head);
+        return;
+    }
     Node *NewNode = new Node(data);
     CheckAllocation(NewNode);
     NewNode->SetNext(head);
@@ -128,6 +136,12 @@ void DLL::InsertAtHead(int data)
 
 void DLL::InsertAtTail(int data)
 {
+    if (!head)
+    {
+        head = tail = new Node(data);
+        CheckAllocation(head);
+        return;
+    }
     Node *NewNode = new Node(data);
     CheckAllocation(NewNode);
     tail->SetNext(NewNode);
@@ -141,7 +155,7 @@ void DLL::InsertAtPos(int data, int pos)
     {
         pos = 1;
     }
-    if (pos == 1)
+    if (pos == 1 || !head)
     {
         InsertAtHead(data);
         return;
@@ -167,6 +181,17 @@ void DLL::InsertAtPos(int data, int pos)
 
 void DLL::DeleteAtHead()
 {
+    if (!head)
+    {
+        return;
+    }
+    if (head == tail)
+    {
+        Node *temp = head;
+        head = tail = nullptr;
+        delete temp;
+        return;
+    }
     Node *temp = head;
     head = head->GetNext();
     head->SetPrev(nullptr);
@@ -176,6 +201,17 @@ void DLL::DeleteAtHead()
 
 void DLL::DeleteAtTail()
 {
+    if (!tail)
+    {
+        return;
+    }
+    if (head == tail)
+    {
+        Node *temp = head;
+        head = tail = nullptr;
+        delete temp;
+        return;
+    }
     Node *temp = tail;
     tail = tail->GetPrev();
     tail->SetNext(nullptr);
@@ -189,7 +225,7 @@ void DLL::DeleteAtPos(int pos)
     {
         pos = 1;
     }
-    if (pos == 1)
+    if (pos == 1 || !head)
     {
         DeleteAtHead();
         return;
@@ -205,6 +241,12 @@ void DLL::DeleteAtPos(int pos)
         return;
     }
     Node *ToBeDeletedNode = temp->GetNext();
+    if (!ToBeDeletedNode) return;
+    if (ToBeDeletedNode == tail)
+    {
+        DeleteAtTail();
+        return;
+    }
     temp->SetNext(temp->GetNext()->GetNext());
     temp->GetNext()->SetPrev(temp);
     delete (ToBeDeletedNode);
