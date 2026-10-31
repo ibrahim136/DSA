@@ -45,6 +45,7 @@ int Stack_LL::pop()
 {
     if (IsEmpty())
     {
+        std::cout << "\nStack is empty\n";
         return INT_MIN;
     }
     int ret = head->Get_data();

@@ -2,7 +2,7 @@
 #define _STACK_ARR_H_
 
 #include <climits>
-#include<iostream>
+#include <iostream>
 
 class Stack_Arr
 {

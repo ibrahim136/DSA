@@ -27,7 +27,7 @@ private:
 
 public:
     Stack_LL();
-    Stack_LL(int capacity);
+    Stack_LL(int data);
     ~Stack_LL();
     bool IsEmpty();
     int pop();
