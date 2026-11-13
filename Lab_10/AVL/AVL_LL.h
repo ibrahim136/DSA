@@ -45,14 +45,16 @@ private:
     void Print_Levels(Node * node) const;
     int count_tree_nodes(Node * node) const;
     int count_leaf_nodes(Node * node) const;
-    Node* PredecessorParent(Node* node) const;
     bool DeleteNode(Node*& node, int key);
     //
-    Node** R_Rotation(Node** node);
-    Node** L_Rotation(Node** node);
-    Node** LR_Rotation(Node** node);
-    Node** RL_Rotation(Node** node);
+    Node* R_Rotation(Node** node);
+    Node* L_Rotation(Node** node);
+    Node* LR_Rotation(Node** node);
+    Node* RL_Rotation(Node** node);
     void Set_Node_height(Node ** node);
+    void BalanceTree(Node **node);
+    int BalanceFactor(Node **node);
+    void Insert(Node **node, int key);
 public:
     AVL_LL();
     AVL_LL(const std::vector<int>& array, Order order);

@@ -1,7 +1,7 @@
 #include "AVL_LL.h"
 
 Node::Node() : left{nullptr}, right{nullptr} {}
-Node::Node(int data) : data{data}, left{nullptr}, right{nullptr} {}
+Node::Node(int data) : data{data}, left{nullptr}, right{nullptr}, height{1} {}
 
 void Node::Set_Left(Node *left)
 {
@@ -69,54 +69,16 @@ AVL_LL::AVL_LL(const std::vector<int> &array, Order order) : root(nullptr)
     }
     if (order == Postorder)
     {
-        std::stack<Node *> s;
-        root = new Node(array.back());
-        s.push(root);
-        for (int i = static_cast<int>(array.size()) - 2; i >= 0; i--)
+        for (int i = static_cast<int>(array.size()) - 1; i >= 0; i--)
         {
-            Node *NewNode = new Node(array[i]);
-            if (s.top()->Get_Data() < array[i])
-            {
-                s.top()->Set_Right(NewNode);
-            }
-            else
-            {
-                Node *temp = nullptr;
-                while (!s.empty() && s.top()->Get_Data() > array[i])
-                {
-                    temp = s.top();
-                    s.pop();
-                }
-                if (temp)
-                    temp->Set_Left(NewNode);
-            }
-            s.push(NewNode);
+            Insert(array[i]);
         }
     }
     else if (order == Preorder)
     {
-        std::stack<Node *> s;
-        root = new Node(array[0]);
-        s.push(root);
-        for (int i = 1; i < static_cast<int>(array.size()); i++)
+        for (int i = 0; i < static_cast<int>(array.size()); i++)
         {
-            Node *NewNode = new Node(array[i]);
-            if (s.top()->Get_Data() > array[i])
-            {
-                s.top()->Set_Left(NewNode);
-            }
-            else
-            {
-                Node *temp = nullptr;
-                while (!s.empty() && s.top()->Get_Data() < array[i])
-                {
-                    temp = s.top();
-                    s.pop();
-                }
-                if (temp)
-                    temp->Set_Right(NewNode);
-            }
-            s.push(NewNode);
+            Insert(array[i]);
         }
     }
 }
@@ -322,83 +284,83 @@ bool AVL_LL::Search(int key) const
     return false;
 }
 
-void AVL_LL::Insert(int key)
+void AVL_LL::Insert(Node **node, int key)
 {
-    Node **curr = &root;
-    while (*curr)
+    if (!(*node))
     {
-        if (key < (*curr)->Get_Data())
-        {
-            curr = &((*curr)->Get_Left());
-        }
-        else if (key > (*curr)->Get_Data())
-        {
-            curr = &((*curr)->Get_Right());
-        }
-        else
-        {
-            break;
-        }
+        *node = new Node(key);
+        return;
     }
-    if (!*curr)
-        *curr = new Node(key);
-    return;
+    if (key < (*node)->Get_Data())
+    {
+        Insert(&((*node)->Get_Left()), key);
+    }
+    else if (key > (*node)->Get_Data())
+    {
+        Insert(&((*node)->Get_Right()), key);
+    }
+    else
+    {
+        return;
+    }
+    Set_Node_height(node);
+    BalanceTree(node);
 }
 
-Node *AVL_LL::PredecessorParent(Node *node) const
+void AVL_LL::Insert(int key)
 {
-    while (node->Get_Right() && node->Get_Right()->Get_Right())
-    {
-        node = node->Get_Right();
-    }
-    return node;
+    Insert(&root, key);
 }
+
+
 
 bool AVL_LL::DeleteNode(Node *&node, int key)
 {
     if (!node)
         return false;
+
+    bool isDeleted = false;
     if (key < node->Get_Data())
     {
-        return DeleteNode(node->Get_Left(), key);
+        isDeleted = DeleteNode(node->Get_Left(), key);
     }
     else if (key > node->Get_Data())
     {
-        return DeleteNode(node->Get_Right(), key);
+        isDeleted = DeleteNode(node->Get_Right(), key);
     }
     else
     {
+        isDeleted = true;
         if (!node->Get_Left())
         {
             Node *temp = node;
             node = node->Get_Right();
             delete temp;
-            return true;
         }
         else if (!node->Get_Right())
         {
             Node *temp = node;
             node = node->Get_Left();
             delete temp;
-            return true;
         }
         else
         {
-            Node *preparent = PredecessorParent(node->Get_Left());
-            if (!preparent->Get_Right())
+            Node *temp = node->Get_Left();
+            while (temp->Get_Right())
             {
-                node->Set_Data(preparent->Get_Data());
-                node->Set_Left(preparent->Get_Left());
-                delete preparent;
-                return true;
+                temp = temp->Get_Right();
             }
-            Node *temp = preparent->Get_Right();
             node->Set_Data(temp->Get_Data());
-            preparent->Set_Right(temp->Get_Left());
-            delete temp;
-            return true;
+            DeleteNode(node->Get_Left(), temp->Get_Data());
         }
     }
+    if (node)
+    {
+        Set_Node_height(&node);
+        BalanceTree(&node);
+    }
+
+    return isDeleted;
 }
 
 bool AVL_LL::DeleteNode(int key)
@@ -406,49 +368,82 @@ bool AVL_LL::DeleteNode(int key)
     return DeleteNode(root, key);
 }
 
-Node **AVL_LL::R_Rotation(Node **node)
+Node *AVL_LL::R_Rotation(Node **node)
 {
-    Node **left_child = &(*node)->Get_Left();
-    (*node)->Set_Left((*left_child)->Get_Right());
-    (*left_child)->Set_Right(*node);
-    return left_child;
+    Node *left_child = (*node)->Get_Left();     // B
+    (*node)->Set_Left(left_child->Get_Right()); // left of A = Right of B
+    left_child->Set_Right(*node);               // right of B = A
+    Set_Node_height(node);
+    Set_Node_height(&left_child);
+    return left_child; // B
 }
 
-Node **AVL_LL::L_Rotation(Node **node)
+Node *AVL_LL::L_Rotation(Node **node)
 {
-    Node **right_child = &(*node)->Get_Right();
-    (*node)->Set_Right((*right_child)->Get_Left());
-    (*right_child)->Set_Right(*node);
+    Node *right_child = (*node)->Get_Right();
+    (*node)->Set_Right(right_child->Get_Left());
+    right_child->Set_Right(*node);
+    Set_Node_height(node);
+    Set_Node_height(&right_child);
     return right_child;
 }
 
-Node **AVL_LL::RL_Rotation(Node **node)
+Node *AVL_LL::RL_Rotation(Node **node)
 {
-    (*node)->Set_Right(*R_Rotation(&((*node)->Get_Right())));
-    *node = * L_Rotation(node);
-    return node;
+    (*node)->Set_Right(R_Rotation(&((*node)->Get_Right())));
+    *node = L_Rotation(node);
+    return *node;
 }
 
-Node **AVL_LL::LR_Rotation(Node **node)
+Node *AVL_LL::LR_Rotation(Node **node)
 {
-    (*node)->Set_Left(*L_Rotation(&((*node)->Get_Left())));
-    *node = * R_Rotation(node);
-    return node;
+    (*node)->Set_Left(L_Rotation(&((*node)->Get_Left())));
+    *node = R_Rotation(node);
+    return *node;
 }
 
-void Set_Node_height(Node ** node)
+void AVL_LL::Set_Node_height(Node **node)
 {
-    int lh,rh;
-    lh = (*node) && (*node)->Get_Left() ? (*node)->Get_Left()->Get_Height():0;
-    rh = (*node) && (*node)->Get_Right() ? (*node)->Get_Right()->Get_Height():0;
-    (*node)->Set_Height(lh>rh?lh+1:rh+1);
+    int lh, rh;
+    lh = (*node) && (*node)->Get_Left() ? (*node)->Get_Left()->Get_Height() : 0;
+    rh = (*node) && (*node)->Get_Right() ? (*node)->Get_Right()->Get_Height() : 0;
+    (*node)->Set_Height(lh > rh ? lh + 1 : rh + 1);
 }
 
-int BalanceFactor(Node ** node)
+int AVL_LL::BalanceFactor(Node **node)
 {
-    int lh,rh;
-    lh = (*node) && (*node)->Get_Left() ? (*node)->Get_Left()->Get_Height():0;
-    rh = (*node) && (*node)->Get_Right() ? (*node)->Get_Right()->Get_Height():0;
-    return lh-rh;
+    int lh, rh;
+    lh = (*node) && (*node)->Get_Left() ? (*node)->Get_Left()->Get_Height() : 0;
+    rh = (*node) && (*node)->Get_Right() ? (*node)->Get_Right()->Get_Height() : 0;
+    return lh - rh;
 }
 
+void AVL_LL::BalanceTree(Node **node)
+{
+    int BF_node = BalanceFactor(node);
+    if (BF_node == 2)
+    {
+        int BF_left = BalanceFactor(&(*node)->Get_Left());
+        if (BF_left == 1 || BF_left == 0)
+        {
+            *node = R_Rotation(node);
+        }
+        else
+        {
+            *node = LR_Rotation(node);
+        }
+    }
+    else if (BF_node == -2)
+    {
+        int BF_right = BalanceFactor(&(*node)->Get_Right());
+        if (BF_right == -1 || BF_right == 0)
+        {
+            *node = L_Rotation(node);
+        }
+        else
+        {
+            *node = RL_Rotation(node);
+        }
+    }
+    Set_Node_height(node);
+}
